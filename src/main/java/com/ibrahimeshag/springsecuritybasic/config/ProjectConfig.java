@@ -15,6 +15,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class ProjectConfig {
 
+    private final CustomAuthenticationProvider authenticationProvider;
+
+    public ProjectConfig(
+            CustomAuthenticationProvider authenticationProvider
+    ) {
+        this.authenticationProvider = authenticationProvider;
+    }
+
     @Bean
     UserDetailsService userDetailsService() {
         // overriding the default user details requires
@@ -32,12 +40,15 @@ public class ProjectConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        return   NoOpPasswordEncoder.getInstance();
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
     SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http.httpBasic(Customizer.withDefaults());
+
+        // adding the custom authenticationProvider
+        http.authenticationProvider(authenticationProvider);
 
         http.authorizeHttpRequests(c -> c
                 .requestMatchers("/world").authenticated()
@@ -45,5 +56,6 @@ public class ProjectConfig {
         );
         return http.build();
     }
+
 
 }
